@@ -5,37 +5,31 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dmotpan.stockapp.api.StocksApi
 import com.dmotpan.stockapp.databinding.ActivityStocksBinding
+import com.dmotpan.stockapp.stocks.common.BaseActivity
 import com.dmotpan.stockapp.viewbinding.viewBinding
 
-class StocksActivity : AppCompatActivity(), LifecycleOwner {
+class StocksActivity : BaseActivity(), LifecycleOwner {
     private val binding by viewBinding {
         ActivityStocksBinding.inflate(LayoutInflater.from(this))
     }
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            StocksViewModelFactory(StocksInteractor.create(StocksApi.create()))
-        )[StocksViewModel::class.java]
-    }
+    lateinit var stocksViewModel: StocksViewModel
 
     private val adapter = StocksAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        injector.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.swipeToRefresh.setOnRefreshListener {
-            viewModel.onSwipeToRefresh()
+            stocksViewModel.onSwipeToRefresh()
         }
         setUpRecycler()
         setUpObservers()
-        viewModel.getStocks()
+        stocksViewModel.getStocks()
     }
 
     private fun setUpRecycler() {
@@ -44,20 +38,20 @@ class StocksActivity : AppCompatActivity(), LifecycleOwner {
     }
 
     private fun setUpObservers() {
-        viewModel.swipeToRefreshLiveData().observe(this) { isRefreshing ->
+        stocksViewModel.swipeToRefreshLiveData().observe(this) { isRefreshing ->
             binding.swipeToRefresh.isRefreshing = isRefreshing
         }
 
-        viewModel.stocksSuccessLiveData().observe(this) { stocks ->
+        stocksViewModel.stocksSuccessLiveData().observe(this) { stocks ->
             adapter.submitList(stocks.asSuccess().data)
         }
-        viewModel.stocksFailureLiveData().observe(this) { exception ->
+        stocksViewModel.stocksFailureLiveData().observe(this) { exception ->
             Log.e("Exception", exception.toString())
         }
-        viewModel.stocksLoadingLiveData().observe(this) {
+        stocksViewModel.stocksLoadingLiveData().observe(this) {
             binding.progressBar.visibility = VISIBLE
         }
-        viewModel.loadingFinishedLiveData().observe(this) {
+        stocksViewModel.loadingFinishedLiveData().observe(this) {
             binding.progressBar.visibility = GONE
         }
     }

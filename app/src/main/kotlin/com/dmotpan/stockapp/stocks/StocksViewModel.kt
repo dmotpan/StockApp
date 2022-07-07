@@ -3,7 +3,6 @@ package com.dmotpan.stockapp.stocks
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.dmotpan.stockapp.api.Resource
 import com.dmotpan.stockapp.api.Resource.Failure
@@ -46,13 +45,5 @@ class StocksViewModel(
         swipeToRefreshLiveData.value = true
         getStocks()
         swipeToRefreshLiveData.value = false
-    }
-}
-
-internal class StocksViewModelFactory(
-    private val stocksInteractor: StocksInteractor
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return StocksViewModel(stocksInteractor) as T
     }
 }

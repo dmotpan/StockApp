@@ -9,6 +9,7 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.dmotpan.stockapp.R
 import com.dmotpan.stockapp.api.Stock
 import com.dmotpan.stockapp.databinding.ListItemStockBinding
+import com.dmotpan.stockapp.stocks.common.BaseActivity
 
 class StockItemLayout @JvmOverloads constructor(
     context: Context,
@@ -16,31 +17,32 @@ class StockItemLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
     private val binding = ListItemStockBinding.inflate(LayoutInflater.from(context), this, true)
-    private val viewModel = StockItemViewModel()
+    lateinit var stocksItemViewModel: StockItemViewModel
 
     override fun onAttachedToWindow() {
+        (context as BaseActivity).viewInjector.inject(this)
         super.onAttachedToWindow()
         setUpObservers()
     }
 
     fun bind(stock: Stock) {
-        viewModel.onBind(stock)
+        stocksItemViewModel.onBind(stock)
     }
 
     private fun setUpObservers() {
-        viewModel.stockNameLiveData().observe(findViewTreeLifecycleOwner()!!) { name ->
+        stocksItemViewModel.stockNameLiveData().observe(findViewTreeLifecycleOwner()!!) { name ->
             binding.stockName.text = name
         }
-        viewModel.stockPriceLiveData().observe(findViewTreeLifecycleOwner()!!) { price ->
+        stocksItemViewModel.stockPriceLiveData().observe(findViewTreeLifecycleOwner()!!) { price ->
             binding.stockPrice.text = price
         }
-        viewModel.stockPriceLiveDecreaseData().observe(findViewTreeLifecycleOwner()!!) {
+        stocksItemViewModel.stockPriceLiveDecreaseData().observe(findViewTreeLifecycleOwner()!!) {
             binding.stockPrice.setTextColor(ContextCompat.getColor(context, R.color.red))
         }
-        viewModel.stockPriceIncreaseLiveData().observe(findViewTreeLifecycleOwner()!!) {
+        stocksItemViewModel.stockPriceIncreaseLiveData().observe(findViewTreeLifecycleOwner()!!) {
             binding.stockPrice.setTextColor(ContextCompat.getColor(context, R.color.green))
         }
-        viewModel.stockPriceLiveNeutralData().observe(findViewTreeLifecycleOwner()!!) {
+        stocksItemViewModel.stockPriceLiveNeutralData().observe(findViewTreeLifecycleOwner()!!) {
             binding.stockPrice.setTextColor(ContextCompat.getColor(context, R.color.black))
         }
     }
